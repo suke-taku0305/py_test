@@ -14,19 +14,6 @@ LOCAL_IP = '0.0.0.0'
 file_in = open("encrypted_data.txt", "rb")
  
 private_key = RSA.import_key(open("private.pem").read())
- 
-# enc_session_key, nonce, tag, ciphertext = \
-#     [file_in.read(x) for x in (private_key.size_in_bytes(), 16, 16, -1)]
- 
-# # decrypt session key with rsa private key
-# cipher_rsa = PKCS1_OAEP.new(private_key)
-# session_key = cipher_rsa.decrypt(enc_session_key)
- 
-# # decrypt data with aes session key
-# cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-# data = cipher_aes.decrypt_and_verify(ciphertext, tag)
-# print("this is initial test message.")
-# print(data.decode("utf-8"))
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
