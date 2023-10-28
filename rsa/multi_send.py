@@ -14,6 +14,8 @@ MCAST_PORT = 5007
 MULTICAST_TTL = 10
 
 data = "this is secret message".encode("utf-8")
+
+block_size = AES.block_size
  
 recipient_key = RSA.import_key(open("public.pem").read())
 session_key = get_random_bytes(16)
@@ -21,9 +23,6 @@ session_key = get_random_bytes(16)
 # encrypt session key with rsa
 cipher_rsa = PKCS1_OAEP.new(recipient_key)
 enc_session_key = cipher_rsa.encrypt(session_key)
- 
-# encrypt data with AES session key
-cipher_aes = AES.new(session_key, AES.MODE_EAX)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
 sock.setsockopt(socket.IPPROTO_IP,
@@ -31,35 +30,30 @@ sock.setsockopt(socket.IPPROTO_IP,
                 socket.inet_aton(LOCAL_IP))
 
 #initial parameter
-param = {"session_key": enc_session_key, "nonce": cipher_aes.nonce}
 print("prepair initial parameter")
-print(param)
+param = {"session_key": enc_session_key}
 param = pickle.dumps(param)
 sock.sendto(param, (MCAST_GRP, MCAST_PORT))
 time.sleep(1)
 
 count = 0
 while True:
-    message = 'this is secret test: {0}'.format(count).encode('utf-8')
+    message = 'this is secret test: {0}'.format(count)
 
-    # this is tested but didn't work
-    # if count == 0:
-    #     ciphertext, tag = cipher_aes.encrypt_and_digest(message)
-    #     data = {"tag": tag, "ciphertext": ciphertext }
-    # else:
-    #     ciphertext = cipher_aes.encrypt(message)
-    #     data = {"ciphertext": ciphertext}
+    print("sended message is:", message)
 
-    ciphertext, tag = cipher_aes.encrypt_and_digest(message)
-    data = {"tag": tag, "ciphertext": ciphertext }
-    # cipher_aes.update(tag)
+    message = message.encode('utf-8')
 
-    # print(ciphertext)
-    # sock.sendto(ciphertext, (MCAST_GRP, MCAST_PORT))
-    # time.sleep(1)
-    # data = {"tag": tag, "ciphertext": ciphertext }
-    # print(data)
-    data = pickle.dumps(data)
+    message_padded = message + b'\0' * (block_size - len(message) % block_size)
+
+    iv = get_random_bytes(16)
+
+    cipher_aes = AES.new(session_key, AES.MODE_CBC, iv)
+
+    ciphertext = cipher_aes.encrypt(message_padded)
+
+    ciphertext = {"iv": iv, "ciphertext": ciphertext}
+    data = pickle.dumps(ciphertext)
     sock.sendto(data, (MCAST_GRP, MCAST_PORT))
     count +=1
     time.sleep(2)
