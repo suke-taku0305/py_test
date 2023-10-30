@@ -45,6 +45,7 @@ while True:
     # decrypt session key with rsa private key
     cipher_rsa = PKCS1_OAEP.new(private_key)
     session_key = cipher_rsa.decrypt(enc_session_key)
+    print("get session_key")
   else:
     print("waiting session_key...")
 
