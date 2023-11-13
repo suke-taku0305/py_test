@@ -10,8 +10,11 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 MCAST_GRP = '224.1.1.1'
 MCAST_PORT = 5007
 LOCAL_IP = '0.0.0.0'
+
+def rsa_decrypt(ciphertext, d, n):
+  return pow(int.from_bytes(ciphertext, "big"), d, n)
  
-private_key = RSA.import_key(open("private.pem").read())
+private_key = RSA.import_key(open("key/private2.pem").read())
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -42,10 +45,7 @@ while True:
     print("Incorrect message")
  
   if is_session_key:
-    # decrypt session key with rsa private key
-    cipher_rsa = PKCS1_OAEP.new(private_key)
-    session_key = cipher_rsa.decrypt(enc_session_key)
-    print(len(session_key))
+    session_key = rsa_decrypt(enc_session_key, private_key.d, private_key.n).to_bytes(16, "big")
   else:
     print("waiting session_key...")
 
@@ -58,5 +58,3 @@ while True:
     iv_text = False
   else:
     print("waiting message...")
-  # msg_data=cipher_aes.decrypt_and_verify(msg, tag)
-  # print(msg_data.decode("utf-8"))

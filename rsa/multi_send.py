@@ -23,6 +23,7 @@ session_key = get_random_bytes(16)
 # encrypt session key with rsa
 cipher_rsa = PKCS1_OAEP.new(recipient_key)
 enc_session_key = cipher_rsa.encrypt(session_key)
+print(len(enc_session_key))
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
 sock.setsockopt(socket.IPPROTO_IP,
