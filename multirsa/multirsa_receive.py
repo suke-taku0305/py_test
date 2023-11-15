@@ -1,16 +1,16 @@
 #!/usr/bin/python36
 
 import socket
-import struct
 import pickle
 
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import AES, PKCS1_OAEP
+from Crypto.Cipher import AES
 
 MCAST_GRP = '224.1.1.1'
 MCAST_PORT = 5007
 LOCAL_IP = '0.0.0.0'
 
+#custom decryption
 def rsa_decrypt(ciphertext, d, n):
   return pow(int.from_bytes(ciphertext, "big"), d, n)
  

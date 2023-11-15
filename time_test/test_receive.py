@@ -2,6 +2,7 @@
 
 import socket
 import pickle
+import time
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES
@@ -14,7 +15,8 @@ LOCAL_IP = '0.0.0.0'
 def rsa_decrypt(ciphertext, d, n):
   return pow(int.from_bytes(ciphertext, "big"), d, n)
  
-private_key = RSA.import_key(open("key/private2.pem").read())
+private_key = RSA.import_key(open("key/private1.pem").read())
+print("privatekey length:", private_key.size_in_bytes())
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -31,14 +33,13 @@ iv_text = False
 
 while True:
   msg=sock.recv(10240)
-  # print(msg.decode("utf-8"))
   data=pickle.loads(msg)
   if "session_key" in data:
-    print("get session key")
+    print("get session key time is:", time.time())
     enc_session_key = data["session_key"]
     is_session_key = True
   elif "iv" in data and "ciphertext" in data:
-    print("get iv and ciphertext")
+    print("get iv and ciphertext time is:", time.time())
     iv, ciphertext = data["iv"], data["ciphertext"]
     iv_text = True
   else:

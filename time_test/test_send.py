@@ -46,6 +46,7 @@ print("prepair initial parameter")
 param = {"session_key": enc_session_key}
 param = pickle.dumps(param)
 sock.sendto(param, (MCAST_GRP, MCAST_PORT))
+print("send param time is:", time.time())
 time.sleep(1)
 
 count = 0
@@ -67,5 +68,6 @@ while True:
     ciphertext = {"iv": iv, "ciphertext": ciphertext}
     data = pickle.dumps(ciphertext)
     sock.sendto(data, (MCAST_GRP, MCAST_PORT))
+    print("send data time is:", time.time())
     count +=1
     time.sleep(2)
