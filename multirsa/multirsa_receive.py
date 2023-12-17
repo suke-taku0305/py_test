@@ -2,6 +2,7 @@
 
 import socket
 import pickle
+import sys
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES
@@ -15,7 +16,7 @@ def rsa_decrypt(ciphertext, d, n):
   return pow(int.from_bytes(ciphertext, "big"), d, n)
  
 private_key = RSA.import_key(open("key/private1.pem").read())
-print("privatekey length:", private_key.size_in_bytes())
+print("privatekey length:", private_key.size_in_bits())
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -45,13 +46,26 @@ while True:
     print("Incorrect message")
  
   if is_session_key:
+    for line in open('privatekey_d.txt', 'r'):
+      private_d = line
+
+    private_d = int(private_d)
+
+    for line in open('privatekey_n.txt', 'r'):
+      private_n = line
+
+    private_n = int(private_n)
+
     session_key = rsa_decrypt(enc_session_key, private_key.d, private_key.n).to_bytes(16, "big")
+
+    #session_key = rsa_decrypt(enc_session_key, private_d, private_n).to_bytes(16, "big")
   else:
     print("waiting session_key...")
 
   if iv_text:
      # decrypt data with aes session key
     cipher_aes = AES.new(session_key, AES.MODE_CBC, iv)
+    print("ciphertext:",ciphertext)
     text = cipher_aes.decrypt(ciphertext)
     unpadded_message = text.rstrip(b'\0')
     print("Decrypt message:", unpadded_message.decode("utf-8"))
