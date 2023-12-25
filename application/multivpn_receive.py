@@ -3,6 +3,7 @@
 import socket
 import pickle
 import time
+import glob
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES
@@ -14,8 +15,11 @@ LOCAL_IP = '0.0.0.0'
 #custom decryption
 def rsa_decrypt(ciphertext, d, n):
   return pow(int.from_bytes(ciphertext, "big"), d, n)
+
+private_files = glob.glob("../mykey/private*.pem")
+private_file = private_files[0]
  
-private_key = RSA.import_key(open("key/private1.pem").read())
+private_key = RSA.import_key(open(private_file).read())
 print("privatekey length:", private_key.size_in_bytes())
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
