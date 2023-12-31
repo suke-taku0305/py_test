@@ -18,6 +18,7 @@ ack_session_time = ''
 decrypt_time = ''
 send_param_time = ''
 send_data_time = ''
+start_time = ''
 
 MULTICAST_TTL = 10
 block_size = AES.block_size
@@ -37,11 +38,17 @@ def judge_ack(ack_message):
         print('error')
 
 def select_recipient():
+    recipients = []
     files = glob.glob("../key/public*.pem")
     print("key list")
     for file in files:
         print(file)
-    recipients = input("select recipient keyfile:").split()
+    
+    #for easy select
+    recipients_num = input("select recipient keyfile number:").split()
+    for recipient_num in recipients_num:
+        recipient = f"../key/public{recipient_num}.pem"
+        recipients.append(recipient)
     return recipients
 
 def encrypt_session_key(recipients):
@@ -101,7 +108,7 @@ def send_ciphertext(send_param_queue, send_data_queue):
         time.sleep(1)
 
 def receive_ack(send_param_queue, send_data_queue):
-    sock.settimeout(10)
+    sock.settimeout(25)
     while True:
         ack = sock.recv(10240)
         ack_message = ack.decode("utf-8")
@@ -119,6 +126,7 @@ def receive_ack(send_param_queue, send_data_queue):
 
 #initial setting
 recipients = select_recipient()
+start_time = time.time()
 enc_session_key = encrypt_session_key(recipients)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)

@@ -32,7 +32,7 @@ sock.setsockopt(socket.IPPROTO_IP,
 
 def receive_ciphertext():
   print("waiting sender...")
-  sock.settimeout(10)
+  sock.settimeout(25)
   is_session_key = False
   iv_text = False
 
