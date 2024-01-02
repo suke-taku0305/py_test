@@ -3,4 +3,4 @@
 sudo apt update
 sudo apt upgrade
 sudo apt install -y python3-pip
-sudo pip install -y pycryptodome
+sudo pip install pycryptodome
